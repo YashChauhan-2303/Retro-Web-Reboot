@@ -165,3 +165,4 @@
 .napster-tab-bar {
   @apply flex bg-[#c0c0c0] px-1 py-1 space-x-1;
 }
+@import "tailwindcss";
