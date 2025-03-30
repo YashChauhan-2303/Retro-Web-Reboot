@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import supabase from "./helper/supabaseClient";
 
 export default function Register() {
@@ -10,7 +10,6 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // Keep all existing functionality unchanged
     e.preventDefault();
     setMessage("");
 
@@ -113,6 +112,10 @@ export default function Register() {
           >
             Register
           </button>
+
+          <p className="mt-4 text-center">
+            Already have an account? <Link to="/login" className="text-blue-700">Login</Link>
+          </p>
         </div>
       </div>
     </div>
