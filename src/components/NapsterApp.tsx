@@ -7,7 +7,6 @@ import UsersList from './UsersList';
 import SongsList from './SongsList';
 import StatusBar from './StatusBar';
 import { Song } from '../data/songs';
-import { toast } from "@/utils/toast";
 import ChatArea from './TabContent/ChatArea';
 import SearchTab from './TabContent/SearchTab';
 import HotList from './TabContent/HotList';
@@ -20,7 +19,6 @@ const NapsterApp: React.FC = () => {
 
   const handleSongSelect = (song: Song) => {
     setSelectedSong(song);
-    toast.info(`Selected: ${song.filename}`);
   };
 
   const renderTabContent = () => {
@@ -61,8 +59,8 @@ const NapsterApp: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen bg-napsterGray">
-      <div className="win98-window w-full h-full">
+    <div className="w-full h-screen bg-napsterGray overflow-hidden">
+      <div className="w-full h-full">
         <div className="p-2 space-y-2 h-full flex flex-col">
           <MenuBar />
           

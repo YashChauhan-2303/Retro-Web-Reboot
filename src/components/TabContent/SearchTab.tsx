@@ -1,31 +1,32 @@
 
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
-import { toast } from "@/utils/toast";
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { mockSongList, MockSong } from '../../data/mockSongList';
 
 const SearchTab = () => {
   const [searchTitle, setSearchTitle] = useState('');
   const [searchArtist, setSearchArtist] = useState('');
   const [maxResults, setMaxResults] = useState(100);
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<MockSong[]>([]);
   
   const handleSearch = () => {
     if (searchTitle.trim() || searchArtist.trim()) {
       setIsSearching(true);
       
-      // Simulate search results with dummy data
       setTimeout(() => {
-        const dummyResults = [
-          { title: 'Song 1', artist: 'Artist A', filesize: '3.5MB', bitrate: '128kbps', time: '3:45' },
-          { title: 'Another Song', artist: 'Artist B', filesize: '4.2MB', bitrate: '192kbps', time: '4:12' },
-          { title: 'Great Hit', artist: 'Artist C', filesize: '5.1MB', bitrate: '256kbps', time: '5:30' }
-        ];
+        const results = mockSongList.filter(song => {
+          const titleMatch = searchTitle.trim() === '' || 
+            song.title.toLowerCase().includes(searchTitle.toLowerCase());
+          const artistMatch = searchArtist.trim() === '' || 
+            song.artist.toLowerCase().includes(searchArtist.toLowerCase());
+          return titleMatch && artistMatch;
+        }).slice(0, maxResults);
         
-        setSearchResults(dummyResults);
+        setSearchResults(results);
         setIsSearching(false);
-      }, 1500);
+      }, 800);
     }
   };
 

@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { Song, songsList as initialSongs } from '../data/songs';
 import { formatFileSize } from '../utils/formatters';
-import { toast } from "@/utils/toast";
 
 interface SongsListProps {
   onSongSelect: (song: Song) => void;
@@ -25,20 +24,18 @@ const SongsList: React.FC<SongsListProps> = ({ onSongSelect }) => {
 
   const handleDownload = () => {
     if (selectedSong) {
-      toast.info(`Started download: ${selectedSong.filename}`);
-    } else {
-      toast.error("No song selected");
+      console.log(`Started download: ${selectedSong.filename}`);
     }
   };
 
   const handleRefreshList = () => {
-    toast.info("Refreshing visible list...");
+    console.log("Refreshing visible list...");
     // Simulate refresh by shuffling the order
     setSongs([...songs].sort(() => Math.random() - 0.5));
   };
 
   const handleRefreshPing = () => {
-    toast.info("Refreshing ping times...");
+    console.log("Refreshing ping times...");
     
     // Update ping times with slight variations
     setSongs(songs.map(song => ({
