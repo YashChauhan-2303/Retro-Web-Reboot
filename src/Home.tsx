@@ -1,29 +1,8 @@
 import React, { useEffect, useState } from "react";
-
-// Define interfaces for type safety
-interface Profile {
-  name: string;
-  email: string;
-}
-
-interface ApiResponse<T> {
-  data: T;
-}
-
-export async function fetchProfile(): Promise<{ profile: Profile }> {
-  // Implement your API call here
-  const response = await fetch('/api/profile');
-  return response.json();
-}
-
-export async function fetchData(): Promise<ApiResponse<any[]>> {
-  // Implement your API call here
-  const response = await fetch('/api/data');
-  return response.json();
-}
+import { fetchProfile, fetchData } from "./helper/apiClient.ts";
 
 export default function Home() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
