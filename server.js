@@ -8,10 +8,6 @@ import SpotifyWebApi from 'spotify-web-api-node';
 // Load environment variables
 dotenv.config();
 
-// Spotify API credentials
-process.env.SPOTIFY_CLIENT_ID = 'your_spotify_client_id';
-process.env.SPOTIFY_CLIENT_SECRET = 'your_spotify_client_secret';
-process.env.SPOTIFY_REDIRECT_URI = 'http://localhost:3000/callback';
 
 // Initialize Express app
 const app = express();

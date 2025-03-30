@@ -1,11 +1,11 @@
 export interface Song {
-  id: string | number;
+  id: string ;
   title?: string;
   artist?: string;
   filename: string;
-  filesize: number | string;
-  bitrate: number | string;
-  frequency: number | string;
+  filesize: number ;
+  bitrate: number ;
+  frequency: number;
   length: string;
   ping: number;
   user?: string;
