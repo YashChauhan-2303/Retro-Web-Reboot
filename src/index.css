@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,19 +36,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -79,6 +73,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+    
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -97,5 +92,84 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Tahoma', 'Arial', sans-serif;
   }
+}
+
+/* Classic Windows 98 styles */
+.win98-window {
+  @apply bg-napsterGray border-[3px] border-solid;
+  border-color: white #808080 #808080 white;
+}
+
+.win98-header {
+  @apply bg-napsterBlue text-white font-bold p-1 flex justify-between items-center;
+}
+
+.win98-button {
+  @apply bg-napsterGray px-2 py-1 border-[2px] border-solid cursor-pointer;
+  border-color: white #808080 #808080 white;
+}
+
+.win98-button:active {
+  border-color: #808080 white white #808080;
+}
+
+.win98-inset {
+  @apply border-[2px] border-solid;
+  border-color: #808080 white white #808080;
+}
+
+.win98-tab {
+  @apply bg-napsterGray border-solid border-[2px] py-1 px-3 inline-flex items-center;
+  border-color: white #808080 #808080 white;
+}
+
+.win98-tab.active {
+  @apply font-bold;
+}
+
+.win98-window-controls {
+  @apply flex gap-1;
+}
+
+.win98-window-button {
+  @apply w-4 h-4 flex items-center justify-center bg-napsterGray border-[1px] border-solid;
+  border-color: white #808080 #808080 white;
+}
+
+table.napster-list {
+  @apply w-full border-collapse;
+}
+
+table.napster-list th {
+  @apply bg-napsterGray text-left p-1 border-b border-napsterDarkGray;
+}
+
+table.napster-list tr:nth-child(odd) {
+  @apply bg-white;
+}
+
+table.napster-list tr:nth-child(even) {
+  @apply bg-[#F0F0F0];
+}
+
+table.napster-list tr.highlighted {
+  @apply bg-[#0A246A] text-white;
+}
+
+.napster-menu-bar {
+  @apply bg-napsterGray px-2 py-1 flex;
+}
+
+.napster-menu-item {
+  @apply px-2 cursor-pointer;
+}
+
+.napster-menu-item:hover {
+  @apply underline;
+}
+
+.napster-advertisement {
+  @apply border border-black bg-[#f9f9f9] p-1 my-2 flex justify-between;
 }
