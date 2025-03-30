@@ -1,68 +1,245 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+/* @import "tailwindcss";
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
+@layer base {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 210 100% 50%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+
+    --radius: 0;
   }
-  a:hover {
-    color: #747bff;
+  .text-foreground {
+    color: hsl(var(--foreground));
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+@layer utilities {
+  .border-border {
+    border-color: hsl(var(--border));
+  }
+}
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-[#c0c0c0] text-foreground;
+    font-family: "MS Sans Serif", "Tahoma", sans-serif;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.win98-window {
+  @apply border-2 border-solid;
+  border-color: #dfdfdf #000000 #000000 #dfdfdf;
+  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 0.1);
+}
+
+.win98-window-inner {
+  @apply border-2 border-solid;
+  border-color: #ffffff #808080 #808080 #ffffff;
+}
+
+.win98-titlebar {
+  @apply bg-primary text-white px-1 py-0.5 flex items-center justify-between font-bold text-sm;
+  letter-spacing: -0.5px;
+}
+
+.win98-button {
+  @apply border-2 border-solid bg-[#c0c0c0] px-2 py-0.5 active:bg-[#a0a0a0] font-normal text-sm;
+  border-color: #ffffff #808080 #808080 #ffffff;
+}
+
+.win98-button:active {
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+
+.win98-inset {
+  @apply border-2 border-solid bg-white;
+  border-color: #808080 #ffffff #ffffff #808080;
+}
+
+.win98-divider {
+  @apply border-t border-[#808080] border-b border-b-white;
+}
+
+.top-menu-item {
+  @apply px-2 py-0.5 cursor-pointer hover:bg-primary hover:text-white;
+}
+
+.song-list {
+  @apply font-mono text-xs;
+}
+
+.song-list tr:nth-child(odd) {
+  @apply bg-[#eaeaea];
+}
+
+.song-list tr:hover {
+  @apply bg-[#d0d8fd];
+}
+
+.song-row {
+  @apply border-b border-[#d0d0d0] cursor-pointer;
+}
+
+.song-row td {
+  @apply py-0.5 px-2;
+}
+
+.hot-list-row {
+  @apply border-b border-[#d0d0d0] cursor-pointer;
+}
+
+.active-row {
+  @apply bg-primary text-white;
+}
+
+.active-row td {
+  @apply text-white;
+}
+
+.player-control {
+  @apply win98-button flex items-center justify-center w-8 h-8;
+}
+
+.tab-button {
+  @apply border-2 border-solid bg-[#c0c0c0] px-3 py-1 text-sm;
+  border-color: #ffffff #808080 #808080 #ffffff;
+}
+
+.tab-button.active {
+  @apply bg-[#c0c0c0] font-bold;
+  border-color: #808080 #ffffff #c0c0c0 #808080;
+}
+
+.status-dot {
+  @apply inline-block w-2 h-2 rounded-full mr-1;
+}
+
+.status-dot-green {
+  @apply bg-green-600;
+}
+
+.status-dot-yellow {
+  @apply bg-yellow-500;
+}
+
+.status-dot-red {
+  @apply bg-red-600;
+}
+
+.napster-menubar {
+  @apply flex bg-[#c0c0c0] border-b border-[#808080];
+}
+
+.napster-tab-bar {
+  @apply flex bg-[#c0c0c0] px-1 py-1 space-x-1;
+}*/
+@import "tailwindcss";
+
+/* @tailwind base; */
+/* @tailwind components; */
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+ 
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+ 
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+ 
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
