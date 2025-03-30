@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import WindowHeader from './WindowHeader';
 import MenuBar from './MenuBar';
 import Advertisement from './Advertisement';
 import TabBar from './TabBar';
@@ -30,7 +29,7 @@ const NapsterApp: React.FC = () => {
         return <ChatArea />;
       case 'Library':
         return (
-          <div className="flex h-[340px] gap-2">
+          <div className="flex h-[calc(100vh-140px)] gap-2">
             <div className="w-1/4">
               <UsersList />
             </div>
@@ -49,7 +48,7 @@ const NapsterApp: React.FC = () => {
         return <FeedbackTab />;
       default:
         return (
-          <div className="flex h-[340px] gap-2">
+          <div className="flex h-[calc(100vh-140px)] gap-2">
             <div className="w-1/4">
               <UsersList />
             </div>
@@ -62,11 +61,9 @@ const NapsterApp: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-screen flex items-center justify-center p-2">
-      <div className="win98-window w-full h-full max-w-[1200px]">
-        <WindowHeader title="napster v2.0 BETA © 1999 napster Inc." />
-        
-        <div className="p-2 space-y-2 h-[calc(100%-28px)] flex flex-col">
+    <div className="w-full h-screen bg-napsterGray">
+      <div className="win98-window w-full h-full">
+        <div className="p-2 space-y-2 h-full flex flex-col">
           <MenuBar />
           
           <Advertisement />

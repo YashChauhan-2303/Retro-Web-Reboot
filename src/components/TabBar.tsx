@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { toast } from "@/utils/toast";
 import { Search, List, MessageSquare, ArrowRightFromLine, MessageCircle } from 'lucide-react';
 
 interface TabBarProps {
@@ -11,7 +10,6 @@ interface TabBarProps {
 const TabBar: React.FC<TabBarProps> = ({ activeTab, setActiveTab }) => {
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
-    toast.info(`Switched to ${tab} tab`);
   };
 
   return (
