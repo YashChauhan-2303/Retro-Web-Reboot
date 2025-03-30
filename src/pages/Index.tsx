@@ -3,7 +3,7 @@ import NapsterApp from '../components/NapsterApp';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-teal-600 p-4">
+    <div className="min-h-screen bg-napsterGray">
       <NapsterApp />
     </div>
   );

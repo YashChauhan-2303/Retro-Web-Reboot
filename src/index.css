@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,6 +92,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Tahoma', 'Arial', sans-serif;
+    overflow: hidden;
   }
 }
 
@@ -103,7 +103,7 @@
 }
 
 .win98-header {
-  @apply bg-napsterBlue text-white font-bold p-1 flex justify-between items-center;
+  @apply bg-napsterDarkGray text-white font-bold p-1 flex justify-between items-center;
 }
 
 .win98-button {
