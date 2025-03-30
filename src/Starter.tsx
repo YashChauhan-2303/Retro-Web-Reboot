@@ -1,44 +1,48 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Starter: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
-    <div className="min-h-screen bg-blue-100 font-sans flex flex-col">
-      {/* Header */}
-      <header className="bg-blue-900 text-white px-4 py-2 border-b-4 border-blue-700">
-        <h1 className="text-3xl font-bold">ByteTunes</h1>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex flex-col flex-grow items-center justify-center py-10">
-        <h2 className="text-4xl font-bold text-blue-900 mb-6">
-          Welcome to ByteTunes
-        </h2>
-        <p className="text-xl text-blue-800 mb-8">
-          Relive the glory days of the 90s music scene!
-        </p>
-        <div className="flex space-x-4">
-          <button
-            onClick={() => navigate("/login")}
-            className="px-6 py-3 bg-blue-700 text-white border border-blue-600 hover:bg-blue-600 transition"
-          >
-            Login
-          </button>
-          <button
-            onClick={() => navigate("/register")}
-            className="px-6 py-3 bg-blue-700 text-white border border-blue-600 hover:bg-blue-600 transition"
-          >
-            Sign Up
-          </button>
+    <div className="flex items-center justify-center min-h-screen bg-[#c0c0c0] text-black font-sans text-sm">
+      <div className="border-2 border-[#808080] shadow-[inset_2px_2px_#dfdfdf] p-0 w-96">
+        {/* Title Bar */}
+        <div className="bg-gradient-to-r from-[#000080] to-[#c0c0c0] text-white p-1 flex justify-between items-center">
+          <span className="font-bold">Welcome to ByteTunes</span>
         </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="bg-blue-900 text-white text-center p-4">
-        <small>© 2025 ByteTunes. All rights reserved.</small>
-      </footer>
+        <div className="p-4 flex flex-col gap-4">
+          <div className="space-y-2">
+            <h2 className="text-center font-bold text-[#000080]">Choose an option:</h2>
+            
+            <div className="flex flex-col gap-3 mt-4">
+              <Link 
+                to="/login"
+                className="w-full px-6 py-2 border-2 border-t-[#dfdfdf] border-l-[#dfdfdf] 
+                         border-b-[#808080] border-r-[#808080] bg-[#c0c0c0] text-black text-center
+                         active:border-t-[#808080] active:border-l-[#808080] 
+                         active:border-b-[#dfdfdf] active:border-r-[#dfdfdf]"
+              >
+                Login
+              </Link>
+              
+              <Link
+                to="/register"
+                className="w-full px-6 py-2 border-2 border-t-[#dfdfdf] border-l-[#dfdfdf] 
+                         border-b-[#808080] border-r-[#808080] bg-[#c0c0c0] text-black text-center
+                         active:border-t-[#808080] active:border-l-[#808080] 
+                         active:border-b-[#dfdfdf] active:border-r-[#dfdfdf]"
+              >
+                Register
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Bar */}
+        <div className="border-t-2 border-[#808080] p-1 text-xs">
+          Status: Ready
+        </div>
+      </div>
     </div>
   );
 };

@@ -18,44 +18,51 @@ const Login: React.FC = () => {
     }
   };
   
-
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-blue-900 text-white font-mono">
-      <h1 className="text-4xl mb-4 font-bold">ByteTunes - Login</h1>
-      <div className="p-6 border border-white bg-blue-800 shadow-lg w-96 text-center">
-        <table className="w-full text-left text-yellow-300 text-lg">
-          <tbody>
-            <tr>
-              <td className="p-2">Email:</td>
-              <td>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-1 border border-yellow-300 bg-blue-700 text-yellow-300"
-                />
-              </td>
-            </tr>
-            <tr>
-              <td className="p-2">Password:</td>
-              <td>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-1 border border-yellow-300 bg-blue-700 text-yellow-300"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        {error && <p className="text-red-400 mt-2">{error}</p>}
-        <button
-          onClick={handleLogin}
-          className="w-full mt-4 px-6 py-2 border border-yellow-300 bg-blue-700 hover:bg-blue-600 text-yellow-300 transition"
-        >
-          Login
-        </button>
+    <div className="flex items-center justify-center min-h-screen bg-[#c0c0c0] text-black font-sans text-sm">
+      <div className="border-2 border-[#808080] shadow-[inset_2px_2px_#dfdfdf] p-0 w-96">
+        {/* Title Bar */}
+        <div className="bg-gradient-to-r from-[#000080] to-[#c0c0c0] text-white p-1 flex justify-between items-center">
+          <span className="font-bold">Login</span>
+        </div>
+
+        <div className="p-4">
+          <table className="w-full text-left">
+            <tbody>
+              <tr>
+                <td className="p-2">Email:</td>
+                <td>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full p-1 border border-inset border-gray-600 bg-white text-black"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td className="p-2">Password:</td>
+                <td>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full p-1 border border-inset border-gray-600 bg-white text-black"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {error && <p className="text-red-600 mt-2">{error}</p>}
+
+          <button
+            onClick={handleLogin}
+            className="w-full mt-4 px-6 py-2 border-2 border-t-[#dfdfdf] border-l-[#dfdfdf] border-b-[#808080] border-r-[#808080] bg-[#c0c0c0] text-black active:border-t-[#808080] active:border-l-[#808080] active:border-b-[#dfdfdf] active:border-r-[#dfdfdf]"
+          >
+            Login
+          </button>
+        </div>
       </div>
     </div>
   );
