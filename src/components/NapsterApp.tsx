@@ -8,7 +8,7 @@ import UsersList from './UsersList';
 import SongsList from './SongsList';
 import StatusBar from './StatusBar';
 import { Song } from '../data/songs';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 const NapsterApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Library');

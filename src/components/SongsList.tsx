@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Song, songsList as initialSongs } from '../data/songs';
 import { formatFileSize } from '../utils/formatters';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 interface SongsListProps {
   onSongSelect: (song: Song) => void;

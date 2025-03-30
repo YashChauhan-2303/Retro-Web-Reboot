@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 const MenuBar: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);

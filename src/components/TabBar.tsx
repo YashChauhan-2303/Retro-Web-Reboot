@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 import { Search, List, MessageSquare, ArrowRightFromLine, MessageCircle } from 'lucide-react';
 
 interface TabBarProps {

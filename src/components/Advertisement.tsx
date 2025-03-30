@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 const Advertisement: React.FC = () => {
   const handleInquireClick = () => {

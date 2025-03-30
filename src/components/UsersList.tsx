@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { usersList } from '../data/songs';
-import { toast } from "@/components/ui/sonner";
+import { toast } from "@/utils/toast";
 
 const UsersList: React.FC = () => {
   const [users] = useState(usersList);
