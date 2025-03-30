@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MenuBar from './MenuBar';
 import Advertisement from './Advertisement';
@@ -6,7 +5,7 @@ import TabBar from './TabBar';
 import UsersList from './UsersList';
 import SongsList from './SongsList';
 import StatusBar from './StatusBar';
-import { Song } from '../data/songs';
+import { Song } from '../types/Song';
 import ChatArea from './TabContent/ChatArea';
 import SearchTab from './TabContent/SearchTab';
 import HotList from './TabContent/HotList';

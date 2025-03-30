@@ -1,32 +1,30 @@
-
 import React, { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { mockSongList, MockSong } from '../../data/mockSongList';
+import { Song } from '../../types/Song'; 
+import axios from 'axios';
 
 const SearchTab = () => {
   const [searchTitle, setSearchTitle] = useState('');
   const [searchArtist, setSearchArtist] = useState('');
   const [maxResults, setMaxResults] = useState(100);
   const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<MockSong[]>([]);
+  const [searchResults, setSearchResults] = useState<Song[]>([]);
   
   const handleSearch = () => {
     if (searchTitle.trim() || searchArtist.trim()) {
       setIsSearching(true);
       
-      setTimeout(() => {
-        const results = mockSongList.filter(song => {
-          const titleMatch = searchTitle.trim() === '' || 
-            song.title.toLowerCase().includes(searchTitle.toLowerCase());
-          const artistMatch = searchArtist.trim() === '' || 
-            song.artist.toLowerCase().includes(searchArtist.toLowerCase());
-          return titleMatch && artistMatch;
-        }).slice(0, maxResults);
-        
-        setSearchResults(results);
-        setIsSearching(false);
-      }, 800);
+      // Use Spotify API instead of mock data
+      axios.get(`/api/spotify/search?query=${searchTitle || searchArtist}&type=track&limit=${maxResults}`)
+        .then(response => {
+          setSearchResults(response.data.songs);
+          setIsSearching(false);
+        })
+        .catch(error => {
+          console.error('Error searching songs:', error);
+          setIsSearching(false);
+        });
     }
   };
 
@@ -120,7 +118,7 @@ const SearchTab = () => {
                   <td>{result.artist}</td>
                   <td>{result.filesize}</td>
                   <td>{result.bitrate}</td>
-                  <td>{result.time}</td>
+                  {/* <td>{result.time}</td> */}
                 </tr>
               ))}
             </tbody>
