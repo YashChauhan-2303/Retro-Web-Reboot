@@ -1,3 +1,4 @@
+
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,6 +10,7 @@ import Login from "./Login";
 import Register from "./Register";
 import Starter from "./Starter";
 import Index from "./pages/Index";
+import SpotifyCallback from "./components/SpotifyCallback";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,7 @@ const App = () => (
           <Route path="/register" element={<Register />} />
           <Route path="/home" element={<Index />} />
           <Route path="/index" element={<Index />} />
+          <Route path="/callback" element={<SpotifyCallback />} />
         </Routes>
       </Router>
     </TooltipProvider>

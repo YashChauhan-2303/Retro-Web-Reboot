@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Song } from '../../types/Song'; 
-import axios from 'axios';
+import { Song } from '../../types/Song';
+import { searchSpotify } from '../../utils/spotifyApi';
+import { searchMockSongsByTitleAndArtist, initializeMockSongs } from '../../data/mockSongList';
+import SpotifyPlayer from '../SpotifyPlayer';
 
 const SearchTab = () => {
   const [searchTitle, setSearchTitle] = useState('');
@@ -10,21 +13,41 @@ const SearchTab = () => {
   const [maxResults, setMaxResults] = useState(100);
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Song[]>([]);
+  const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const resultsPerPage = 20;
   
-  const handleSearch = () => {
+  useEffect(() => {
+    // Initialize mock songs when component loads
+    initializeMockSongs();
+  }, []);
+  
+  const handleSearch = async () => {
     if (searchTitle.trim() || searchArtist.trim()) {
       setIsSearching(true);
       
-      // Use Spotify API instead of mock data
-      axios.get(`/api/spotify/search?query=${searchTitle || searchArtist}&type=track&limit=${maxResults}`)
-        .then(response => {
-          setSearchResults(response.data.songs);
-          setIsSearching(false);
-        })
-        .catch(error => {
-          console.error('Error searching songs:', error);
-          setIsSearching(false);
-        });
+      try {
+        let results: Song[] = [];
+        
+        // First try local search
+        results = searchMockSongsByTitleAndArtist(searchTitle, searchArtist);
+        
+        // If local search yields no results, try Spotify API
+        if (results.length === 0) {
+          const query = searchTitle || searchArtist;
+          const spotifyResults = await searchSpotify(query, 'track', maxResults);
+          if (spotifyResults && spotifyResults.length > 0) {
+            results = spotifyResults;
+          }
+        }
+        
+        setSearchResults(results);
+        setCurrentPage(1);
+      } catch (error) {
+        console.error('Error during search:', error);
+      } finally {
+        setIsSearching(false);
+      }
     }
   };
 
@@ -32,8 +55,41 @@ const SearchTab = () => {
     setSearchTitle('');
     setSearchArtist('');
     setSearchResults([]);
+    setSelectedSong(null);
     setIsSearching(false);
+    setCurrentPage(1);
   };
+  
+  const handleSongClick = (song: Song) => {
+    setSelectedSong(song);
+    
+    // Update search results to highlight the selected song
+    setSearchResults(searchResults.map(s => ({
+      ...s,
+      isHighlighted: s.id === song.id
+    })));
+  };
+  
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+  
+  const handleNextPage = () => {
+    const maxPages = Math.ceil(searchResults.length / resultsPerPage);
+    if (currentPage < maxPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+  
+  // Get current page's results
+  const paginatedResults = searchResults.slice(
+    (currentPage - 1) * resultsPerPage,
+    currentPage * resultsPerPage
+  );
+  
+  const totalPages = Math.ceil(searchResults.length / resultsPerPage);
 
   return (
     <div className="h-[calc(100vh-140px)] flex flex-col">
@@ -82,10 +138,23 @@ const SearchTab = () => {
             </button>
           </div>
           <div className="space-x-2">
-            <button className="win98-button flex items-center">
+            <button 
+              className="win98-button flex items-center"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1}
+            >
               <ChevronLeft size={14} className="mr-1" /> Previous
             </button>
-            <button className="win98-button flex items-center">
+            {searchResults.length > 0 && (
+              <span className="mx-2">
+                Page {currentPage} of {totalPages}
+              </span>
+            )}
+            <button 
+              className="win98-button flex items-center"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages}
+            >
               <ChevronRight size={14} className="mr-1" /> Next
             </button>
           </div>
@@ -100,7 +169,7 @@ const SearchTab = () => {
               <div>Please wait while Napster searches for your query</div>
             </div>
           </div>
-        ) : searchResults.length > 0 ? (
+        ) : paginatedResults.length > 0 ? (
           <table className="napster-list w-full">
             <thead>
               <tr>
@@ -108,17 +177,23 @@ const SearchTab = () => {
                 <th>Artist</th>
                 <th>Size</th>
                 <th>Bitrate</th>
-                <th>Time</th>
+                <th>Length</th>
+                <th>Ping</th>
               </tr>
             </thead>
             <tbody>
-              {searchResults.map((result, index) => (
-                <tr key={index} className={index === 0 ? 'highlighted' : ''}>
-                  <td>{result.title}</td>
-                  <td>{result.artist}</td>
-                  <td>{result.filesize}</td>
-                  <td>{result.bitrate}</td>
-                  {/* <td>{result.time}</td> */}
+              {paginatedResults.map((result, index) => (
+                <tr 
+                  key={result.id || index}
+                  className={result.isHighlighted ? 'highlighted' : ''}
+                  onClick={() => handleSongClick(result)}
+                >
+                  <td>{result.title || result.filename}</td>
+                  <td>{result.artist || 'Unknown Artist'}</td>
+                  <td>{formatFileSize(result.filesize)}</td>
+                  <td>{result.bitrate} kbps</td>
+                  <td>{result.length}</td>
+                  <td>{result.ping}</td>
                 </tr>
               ))}
             </tbody>
@@ -129,8 +204,19 @@ const SearchTab = () => {
           </div>
         )}
       </div>
+      
+      {selectedSong && <SpotifyPlayer song={selectedSong} />}
     </div>
   );
+};
+
+// Helper function to format file sizes
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return bytes + ' B';
+  const kb = bytes / 1024;
+  if (kb < 1024) return kb.toFixed(1) + ' KB';
+  const mb = kb / 1024;
+  return mb.toFixed(1) + ' MB';
 };
 
 export default SearchTab;
