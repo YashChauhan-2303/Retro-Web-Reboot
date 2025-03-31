@@ -3,9 +3,9 @@ import SpotifyPlayer from './SpotifyPlayer';
 
 // Import audio files
 // Note: You'll need to replace these with your actual file names
-import bohemianRhapsody from '../Song/IshqMein.mp3';
-import billieJean from '../Song/JaaneTu.mp3';
-import hotelCalifornia from '../Song/ShoppingList.mp3';
+import ishqmein from '../Song/IshqMein.mp3';
+import jaanetu from '../Song/JaaneTu.mp3';
+import shoplist from '../Song/ShoppingList.mp3';
 
 interface Song {
   id: number;
@@ -27,33 +27,33 @@ const SongsList: React.FC = () => {
   const songsList: Song[] = [
     {
       id: 1,
-      filename: "Bohemian Rhapsody - Queen.mp3",
+      filename: "Ishq Mein.mp3",
       filesize: 9812345,
-      length: "5:55",
+      length: "4:22",
       user: "MusicLover99",
       ping: "122ms",
       isHighlighted: false,
-      audioPath: bohemianRhapsody
+      audioPath: ishqmein
     },
     {
       id: 2,
-      filename: "Billie Jean - Michael Jackson.mp3",
+      filename: "JaaneTu.mp3",
       filesize: 8723456,
-      length: "4:54",
+      length: "4:44",
       user: "KingOfPop",
       ping: "98ms",
-      isHighlighted: true,
-      audioPath: billieJean
+      isHighlighted: false,
+      audioPath: jaanetu
     },
     {
       id: 3,
-      filename: "Hotel California - Eagles.mp3",
+      filename: "ShoppingList.mp3",
       filesize: 10234567,
-      length: "6:30",
+      length: "2:58",
       user: "ClassicRock",
       ping: "135ms",
       isHighlighted: false,
-      audioPath: hotelCalifornia
+      audioPath: shoplist
     }
   ];
 
@@ -116,11 +116,19 @@ const SongsList: React.FC = () => {
           </thead>
           <tbody>
             {songsList.map((song) => (
-              <tr
-                key={song.id}
-                className={`cursor-pointer ${song.isHighlighted ? 'highlighted' : ''} ${selectedSong?.id === song.id ? 'bg-[#0A246A] text-white' : ''}`}
-                onClick={() => handleSongClick(song)}
-              >
+               <tr
+               key={song.id}
+               className={`cursor-pointer transition 
+                 ${
+                   selectedSong?.id === song.id
+                     ? 'bg-[#0A246A] text-yellow-300 font-bold' // Keep selected song highlighted
+                     : 'hover:bg-red-500 hover:text-blue-500'  // Apply hover effect only if not selected
+                 }`}
+               onClick={() => handleSongClick(song)}
+             >
+             
+            
+            
                 <td>
                   {selectedSong?.id === song.id && isPlaying ? 
                     '▶️' : 
