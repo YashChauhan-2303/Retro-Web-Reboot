@@ -3,9 +3,9 @@ import SpotifyPlayer from './SpotifyPlayer';
 
 // Import audio files
 // Note: You'll need to replace these with your actual file names
-import bohemianRhapsody from '../Song/bohemian_rhapsody.mp3';
-import billieJean from '../Song/billie_jean.mp3';
-import hotelCalifornia from '../Song/hotel_california.mp3';
+import bohemianRhapsody from '../Song/IshqMein.mp3';
+import billieJean from '../Song/JaaneTu.mp3';
+import hotelCalifornia from '../Song/ShoppingList.mp3';
 
 interface Song {
   id: number;
