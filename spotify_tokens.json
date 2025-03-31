@@ -1,8 +1,5 @@
 {
-  "access_token": "BQAlChYvgzdi0MZ2k6ia-CAzQ-MzAclwyI5MLMae0jUDuDnsFovrcWg0xnw4U4mm7-NhUX0QAlA5v7QWXukHCJmckaFLWoKlpi__JpqO5JgOEgtFz9P9w5reD2n3VtGvxF873_uDg2MEUGTofcGqxMawZg-KrjkHRuENuiYhRn066D-ufji2LDB0ZN3YTmVT0WgqqD5T1b7WILnscneme8WHpnr8r1i4-RsVuk7jHSp31Aoj7Jy7Du8oBe8",
-  "token_type": "Bearer",
-  "expires_in": 3600,
-  "refresh_token": "AQDfq59PlG7mIOn44R6CP-we2EMloIToUpAA80i6kw0NIfZJCzHx29Be6PIRJzGI12HzXIOO-SuK28OO2rTnGq3E9Cw1TXiHRTwqPQJvQk6Ct7S2shUitVM1ysKOHh8-dCs",
-  "scope": "user-read-playback-state user-read-email user-read-private",
-  "created_at": 1743405706777
+  "error": "invalid_client",
+  "error_description": "Invalid client",
+  "created_at": 1743407527134
 }

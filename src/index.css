@@ -173,3 +173,19 @@ table.napster-list tr.highlighted {
 .napster-advertisement {
   @apply border border-black bg-[#f9f9f9] p-1 my-2 flex justify-between;
 }
+
+@layer components {
+  .napster-list tr {
+    cursor: pointer;
+  }
+
+  .napster-list tr:hover {
+    background-color: #0000ff;
+    color: white;
+  }
+
+  .napster-list tr.highlighted {
+    background-color: #000080;
+    color: white;
+  }
+}
