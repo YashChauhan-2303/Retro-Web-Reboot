@@ -3,11 +3,11 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
 import bodyParser from 'body-parser';
-import SpotifyWebApi from 'spotify-web-api-node';
+import fs from 'fs';
+import fetch from 'node-fetch';
 
 // Load environment variables
 dotenv.config();
-
 
 // Initialize Express app
 const app = express();
@@ -30,16 +30,92 @@ if (supabaseUrl && supabaseKey) {
   console.warn('Supabase credentials missing. Supabase functionality will not work.');
 }
 
-// Initialize Spotify API client
-const spotifyApi = new SpotifyWebApi({
-  clientId: process.env.SPOTIFY_CLIENT_ID,
-  clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-  redirectUri: process.env.SPOTIFY_REDIRECT_URI
-});
-
 // Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
+
+// Function to exchange authorization code for access token
+async function exchangeCodeForToken(authCode) {
+  try {
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    const redirectUri = process.env.SPOTIFY_REDIRECT_URI || 'http://localhost:5001/callback';
+    
+    // Create base64 encoded auth string
+    const authString = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
+    // Make request to Spotify token endpoint
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${authString}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: authCode,
+        redirect_uri: redirectUri,
+      }),
+    });
+    
+    const data = await response.json();
+    
+    // Add creation timestamp for expiration tracking
+    const tokenDataWithTimestamp = {
+      ...data,
+      created_at: Date.now()
+    };
+
+    // Save token response to file
+    fs.writeFileSync('spotify_tokens.json', JSON.stringify(tokenDataWithTimestamp, null, 2));
+    console.log('Spotify tokens saved to spotify_tokens.json');
+    
+    return tokenDataWithTimestamp;
+  } catch (error) {
+    console.error('Error exchanging code for token:', error);
+    throw error;
+  }
+}
+
+// Route to handle Spotify callback and save authorization code
+app.get('/callback', async (req, res) => {
+  const code = req.query.code;
+
+  if (!code) {
+    return res.status(400).send('Authorization code not found');
+  }
+
+  console.log('Authorization Code:', code);
+
+  // Save the code to a file
+  fs.writeFileSync('auth_code.txt', code);
+  console.log('Authorization code saved to auth_code.txt');
+  
+  try {
+    // Exchange code for token immediately after callback
+    const tokenData = await exchangeCodeForToken(code);
+    res.send('Authorization successful! Access token received and saved.');
+  } catch (error) {
+    console.error('Failed to exchange auth code for token:', error);
+    res.status(500).send('Authorization successful, but failed to exchange code for token.');
+  }
+});
+
+// Endpoint to manually trigger token exchange
+app.post('/api/exchange-token', async (req, res) => {
+  try {
+    // Read auth code from file
+    const authCode = fs.readFileSync('auth_code.txt', 'utf-8').trim();
+    
+    // Exchange code for token
+    const tokenData = await exchangeCodeForToken(authCode);
+    
+    res.json({ success: true, message: 'Token exchange successful' });
+  } catch (error) {
+    console.error('Error in token exchange endpoint:', error);
+    res.status(500).json({ error: 'Failed to exchange token' });
+  }
 });
 
 // User profile route - protected by auth
@@ -117,207 +193,157 @@ app.post('/api/data', async (req, res) => {
   }
 });
 
-// Spotify Authentication Routes
-app.get('/api/spotify/login', (req, res) => {
-  const scopes = [
-    'user-read-private',
-    'user-read-email',
-    'user-top-read',
-    'user-read-recently-played',
-    'streaming',
-    'user-library-read',
-    'user-library-modify',
-    'playlist-read-private',
-    'playlist-modify-public',
-    'playlist-modify-private'
-  ];
-  
-  const authorizeURL = spotifyApi.createAuthorizeURL(scopes, '');
-  res.json({ url: authorizeURL });
-});
-
-app.post('/api/spotify/callback', async (req, res) => {
-  const { code } = req.body;
-  
+// Function to get the access token from saved tokens file
+function getSpotifyAccessToken() {
   try {
-    const data = await spotifyApi.authorizationCodeGrant(code);
-    
-    // Save the access token, refresh token, and expiry time
-    spotifyApi.setAccessToken(data.body['access_token']);
-    spotifyApi.setRefreshToken(data.body['refresh_token']);
-    
-    // You might want to store these tokens in your database for the user
-    // associated with the current session/auth
-    
-    res.json({
-      accessToken: data.body['access_token'],
-      expiresIn: data.body['expires_in']
-    });
+    const tokenData = JSON.parse(fs.readFileSync('spotify_tokens.json', 'utf-8'));
+    return tokenData.access_token;
   } catch (error) {
-    console.error('Spotify auth error:', error);
-    res.status(400).json({ error: 'Failed to authenticate with Spotify' });
+    console.error('Error reading Spotify tokens file:', error);
+    throw new Error('Spotify access token not found');
   }
-});
-
-// Spotify API endpoints
-app.get('/api/spotify/me', async (req, res) => {
-  try {
-    const data = await spotifyApi.getMe();
-    res.json(data.body);
-  } catch (error) {
-    console.error('Error getting Spotify profile:', error);
-    res.status(500).json({ error: 'Failed to get Spotify profile' });
-  }
-});
-
-app.get('/api/spotify/top-tracks', async (req, res) => {
-  try {
-    const data = await spotifyApi.getMyTopTracks({ limit: 10 });
-    res.json(data.body);
-  } catch (error) {
-    console.error('Error getting top tracks:', error);
-    res.status(500).json({ error: 'Failed to get top tracks' });
-  }
-});
-
-app.post('/api/spotify/refresh-token', async (req, res) => {
-  try {
-    const data = await spotifyApi.refreshAccessToken();
-    spotifyApi.setAccessToken(data.body['access_token']);
-    
-    res.json({
-      accessToken: data.body['access_token'],
-      expiresIn: data.body['expires_in']
-    });
-  } catch (error) {
-    console.error('Error refreshing token:', error);
-    res.status(500).json({ error: 'Failed to refresh token' });
-  }
-});
-
-// Search for songs on Spotify
-app.get('/api/spotify/search', async (req, res) => {
-  const { query, type = 'track', limit = 20 } = req.query;
-  
-  if (!query) {
-    return res.status(400).json({ error: 'Search query is required' });
-  }
-  
-  try {
-    const data = await spotifyApi.search(query, [type], { limit });
-    
-    // Transform Spotify track data to match your frontend structure
-    if (type === 'track' && data.body.tracks) {
-      const songs = data.body.tracks.items.map((track) => ({
-        id: track.id,
-        title: track.name,
-        artist: track.artists.map(artist => artist.name).join(', '),
-        filesize: '~7MB', // Spotify doesn't provide file size
-        bitrate: '320kbps', // Spotify premium quality
-        frequency: '44.1kHz',
-        length: msToMinutesAndSeconds(track.duration_ms),
-        ping: Math.floor(Math.random() * 20) + 10, // Mock ping value
-        album: track.album.name,
-        albumArt: track.album.images[0]?.url,
-        preview_url: track.preview_url,
-        uri: track.uri
-      }));
-      
-      return res.json({ songs });
-    }
-    
-    res.json(data.body);
-  } catch (error) {
-    console.error('Error searching Spotify:', error);
-    res.status(500).json({ error: 'Failed to search Spotify' });
-  }
-});
-
-// Get recommended tracks
-app.get('/api/spotify/recommendations', async (req, res) => {
-  try {
-    // Check if Spotify API is properly configured
-    if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
-      return res.status(500).json({ error: 'Spotify API not configured' });
-    }
-
-    // Try to get a client credentials token if we don't have one yet
-    if (!spotifyApi.getAccessToken()) {
-      try {
-        const data = await spotifyApi.clientCredentialsGrant();
-        spotifyApi.setAccessToken(data.body['access_token']);
-      } catch (tokenError) {
-        console.error('Error getting Spotify token:', tokenError);
-        return res.status(500).json({ error: 'Failed to authenticate with Spotify' });
-      }
-    }
-
-    // Get recommendations based on seed genres
-    const data = await spotifyApi.getRecommendations({
-      seed_genres: ['pop', 'rock', 'hip-hop'],
-      limit: 30
-    });
-    
-    const songs = data.body.tracks.map((track) => ({
-      id: track.id,
-      title: track.name,
-      artist: track.artists.map(artist => artist.name).join(', '),
-      filename: `${track.artists[0]?.name} - ${track.name}.mp3`,
-      filesize: '~7MB',
-      bitrate: '320kbps',
-      frequency: '44.1kHz',
-      length: msToMinutesAndSeconds(track.duration_ms),
-      ping: Math.floor(Math.random() * 20) + 10,
-      album: track.album.name,
-      albumArt: track.album.images[0]?.url,
-      preview_url: track.preview_url,
-      uri: track.uri
-    }));
-    
-    res.json({ songs });
-  } catch (error) {
-    console.error('Error getting recommendations:', error);
-    res.status(500).json({ error: 'Failed to get recommendations' });
-  }
-});
-
-// Get a specific track by ID
-app.get('/api/spotify/track/:id', async (req, res) => {
-  const { id } = req.params;
-  
-  try {
-    const data = await spotifyApi.getTrack(id);
-    const track = data.body;
-    
-    res.json({
-      id: track.id,
-      title: track.name,
-      artist: track.artists.map(artist => artist.name).join(', '),
-      filesize: '~7MB',
-      bitrate: '320kbps',
-      frequency: '44.1kHz',
-      length: msToMinutesAndSeconds(track.duration_ms),
-      ping: Math.floor(Math.random() * 20) + 10,
-      filename: `${track.artists[0]?.name} - ${track.name}.mp3`,
-      album: track.album.name,
-      albumArt: track.album.images[0]?.url,
-      preview_url: track.preview_url,
-      uri: track.uri
-    });
-  } catch (error) {
-    console.error('Error getting track:', error);
-    res.status(500).json({ error: 'Failed to get track' });
-  }
-});
-
-// Helper function to convert milliseconds to minutes:seconds format
-function msToMinutesAndSeconds(ms) {
-  const minutes = Math.floor(ms / 60000);
-  const seconds = ((ms % 60000) / 1000).toFixed(0);
-  return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
+
+// Function to check if token is expired or about to expire
+function isTokenExpired() {
+  try {
+    const tokenData = JSON.parse(fs.readFileSync('spotify_tokens.json', 'utf-8'));
+    
+    // If we don't have an expiration timestamp stored, create one
+    if (!tokenData.created_at) {
+      return true; // Assume expired if we don't know when it was created
+    }
+    
+    const createdAt = tokenData.created_at;
+    const expiresIn = tokenData.expires_in;
+    const now = Date.now();
+    
+    // Check if token is expired or will expire in next 5 minutes
+    const isExpired = now >= (createdAt + (expiresIn * 1000) - 300000); // 5 minutes buffer
+    return isExpired;
+  } catch (error) {
+    console.error('Error checking token expiration:', error);
+    return true; // Assume expired on error
+  }
+}
+
+// Function to refresh the access token
+async function refreshAccessToken() {
+  try {
+    // Read current tokens
+    const tokenData = JSON.parse(fs.readFileSync('spotify_tokens.json', 'utf-8'));
+    const refreshToken = tokenData.refresh_token;
+    
+    if (!refreshToken) {
+      throw new Error('Refresh token not found');
+    }
+    
+    // Get client credentials
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    
+    // Create base64 encoded auth string
+    const authString = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    
+    // Make request to Spotify token endpoint
+    const response = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${authString}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: refreshToken,
+      }),
+    });
+    
+    const newTokenData = await response.json();
+    
+    if (newTokenData.error) {
+      throw new Error(`Spotify API Error: ${newTokenData.error_description}`);
+    }
+    
+    // Save new access token but keep the refresh token if not provided
+    const updatedTokenData = {
+      ...newTokenData,
+      refresh_token: newTokenData.refresh_token || refreshToken, // Keep old refresh token if not provided
+      created_at: Date.now() // Add timestamp for expiration check
+    };
+    
+    // Save updated token data
+    fs.writeFileSync('spotify_tokens.json', JSON.stringify(updatedTokenData, null, 2));
+    console.log('Access token refreshed successfully');
+    
+    return updatedTokenData.access_token;
+  } catch (error) {
+    console.error('Error refreshing access token:', error);
+    throw error;
+  }
+}
+
+// Enhanced function to get a valid access token (refresh if needed)
+async function getValidSpotifyAccessToken() {
+  try {
+    // Check if token is expired
+    if (isTokenExpired()) {
+      console.log('Access token expired, refreshing...');
+      return await refreshAccessToken();
+    }
+    
+    // Token is still valid, return it
+    const tokenData = JSON.parse(fs.readFileSync('spotify_tokens.json', 'utf-8'));
+    return tokenData.access_token;
+  } catch (error) {
+    console.error('Error getting valid access token:', error);
+    throw new Error('Failed to get valid Spotify access token');
+  }
+}
+
+// Endpoint to get current playback state 
+app.get('/api/spotify/playback', async (req, res) => {
+  try {
+    // Get a valid access token (auto-refreshes if needed)
+    const accessToken = await getValidSpotifyAccessToken();
+    
+    // Make request to Spotify API
+    const response = await fetch('https://api.spotify.com/v1/me/player', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+    
+    // Handle 204 No Content response (no active playback)
+    if (response.status === 204) {
+      const noContentData = { message: "No active playback session found" };
+      fs.writeFileSync('spotify_playback_state.json', JSON.stringify(noContentData, null, 2));
+      return res.json(noContentData);
+    }
+    
+    // Handle error responses
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(response.status).json(errorData);
+    }
+    
+    // Handle successful responses
+    const data = await response.json();
+    
+    // Save response to file
+    fs.writeFileSync('spotify_playback_state.json', JSON.stringify(data, null, 2));
+    console.log('Playback state saved to spotify_playback_state.json');
+    
+    return res.json(data);
+  } catch (error) {
+    console.error('Error fetching playback state:', error);
+    return res.status(500).json({ error: 'Failed to fetch playback state', details: error.message });
+  }
+});
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server is running at http://localhost:${PORT}`);
 });
+
+

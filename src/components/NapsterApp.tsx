@@ -15,9 +15,32 @@ import FeedbackTab from './TabContent/FeedbackTab';
 const NapsterApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Library');
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
-
-  const handleSongSelect = (song: Song) => {
-    setSelectedSong(song);
+  
+  const handleSpotifyAuth = () => {
+    const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID || '5671179244724cbc96654ba78a6da871';
+    
+    const authUrl = 'https://accounts.spotify.com/authorize' + 
+      `?client_id=${clientId}` +
+      '&response_type=code' +
+      '&redirect_uri=http://localhost:5001/callback' +
+      '&scope=user-read-private%20user-read-email%20user-read-playback-state';
+    
+    window.open(authUrl, 'spotify_auth_window', 'width=600,height=700,menubar=no,toolbar=no');
+  };
+  
+  const handleGetSongs = async () => {
+    try {
+      const response = await fetch('http://localhost:5001/api/spotify/playback');
+      if (!response.ok) {
+        throw new Error('Failed to fetch playback state');
+      }
+      const data = await response.json();
+      console.log('Playback state retrieved:', data);
+      alert('Playback state retrieved and saved to spotify_playback_state.json');
+    } catch (error) {
+      console.error('Error fetching playback state:', error);
+      alert('Error fetching playback state. Check console for details.');
+    }
   };
 
   const renderTabContent = () => {
@@ -31,7 +54,7 @@ const NapsterApp: React.FC = () => {
               <UsersList />
             </div>
             <div className="w-3/4">
-              <SongsList onSongSelect={handleSongSelect} />
+              <SongsList />
             </div>
           </div>
         );
@@ -50,7 +73,7 @@ const NapsterApp: React.FC = () => {
               <UsersList />
             </div>
             <div className="w-3/4">
-              <SongsList onSongSelect={handleSongSelect} />
+              <SongsList />
             </div>
           </div>
         );
@@ -65,7 +88,21 @@ const NapsterApp: React.FC = () => {
           
           <Advertisement />
           
-          <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <div className="flex items-center">
+            <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
+            <button 
+              onClick={handleSpotifyAuth}
+              className="ml-2 px-3 py-1 text-sm font-medium bg-napsterGray border border-gray-600 hover:bg-gray-700 text-white"
+            >
+              Spotify
+            </button>
+            <button 
+              onClick={handleGetSongs}
+              className="ml-2 px-3 py-1 text-sm font-medium bg-napsterGray border border-gray-600 hover:bg-gray-700 text-white"
+            >
+              Get Songs
+            </button>
+          </div>
           
           {renderTabContent()}
           

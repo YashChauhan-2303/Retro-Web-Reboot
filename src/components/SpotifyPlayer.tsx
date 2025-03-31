@@ -1,81 +1,113 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Song } from '../types/Song';
+import React, { useEffect, useState } from 'react';
 
-interface PlayerProps {
-  song: Song | null;
+interface PlaybackTrack {
+  name: string;
+  artists: { name: string }[];
+  album: {
+    name: string;
+    images: { url: string }[];
+  };
 }
 
-const SpotifyPlayer: React.FC<PlayerProps> = ({ song }) => {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+interface PlaybackState {
+  item?: PlaybackTrack;
+  is_playing?: boolean;
+  message?: string; // For "No active playback session found" message
+}
+
+const SpotifyPlayer: React.FC = () => {
+  const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (song && audioRef.current) {
-      // Reset error state
+  const fetchPlaybackState = async () => {
+    try {
+      setLoading(true);
       setError(null);
       
-      // For mock data or when preview URL is not available
-      if (!song.preview_url) {
-        setError("No preview available for this track");
-        setIsPlaying(false);
-        return;
-      }
+      const response = await fetch('http://localhost:5001/api/spotify/playback');
+      const data = await response.json();
       
-      // If we have a preview URL, play it
-      audioRef.current.src = song.preview_url;
-      audioRef.current.play()
-        .then(() => {
-          setIsPlaying(true);
-        })
-        .catch(err => {
-          console.error('Playback error:', err);
-          setError("Could not play this track");
-          setIsPlaying(false);
-        });
-    }
-  }, [song]);
-
-  const handlePlayPause = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play()
-          .catch(err => {
-            console.error('Playback error:', err);
-            setError("Could not play this track");
-          });
-      }
-      setIsPlaying(!isPlaying);
+      setPlaybackState(data);
+      console.log('Fetched playback state:', data);
+    } catch (err) {
+      console.error('Error fetching playback:', err);
+      setError('Could not fetch playback information');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!song) return null;
+  useEffect(() => {
+    // Fetch playback state when component mounts
+    fetchPlaybackState();
+    
+    // Set up polling to refresh playback state every 30 seconds
+    const intervalId = setInterval(fetchPlaybackState, 30000);
+    
+    // Clean up interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
-  const songTitle = song.title || song.filename.split(' - ')[1]?.replace('.mp3', '') || song.filename;
-  const songArtist = song.artist || song.filename.split(' - ')[0]?.replace('MP3-(', '') || 'Unknown Artist';
+  if (loading) {
+    return <div className="win98-window p-2 mt-4">Loading playback information...</div>;
+  }
+
+  if (error) {
+    return <div className="win98-window p-2 mt-4 text-red-500">{error}</div>;
+  }
+
+  // No active playback session
+  if (playbackState?.message) {
+    return (
+      <div className="win98-window p-2 mt-4">
+        <div className="text-center p-4">
+          {playbackState.message}. Start playing something on Spotify!
+        </div>
+      </div>
+    );
+  }
+
+  // No data received yet
+  if (!playbackState || !playbackState.item) {
+    return (
+      <div className="win98-window p-2 mt-4">
+        <div className="text-center p-4">
+          No playback information available
+        </div>
+      </div>
+    );
+  }
+
+  const { item, is_playing } = playbackState;
+  const albumImage = item.album.images[0]?.url;
+  const artistNames = item.artists.map(artist => artist.name).join(', ');
 
   return (
     <div className="win98-window p-2 mt-4">
-      <div className="flex items-center space-x-2">
-        {song.albumArt && (
-          <img src={song.albumArt} alt={song.album} className="w-12 h-12" />
+      <div className="flex items-center space-x-3">
+        {albumImage && (
+          <img src={albumImage} alt={item.album.name} className="w-16 h-16" />
         )}
-        <div>
-          <div className="font-bold">{songTitle}</div>
-          <div className="text-sm">{songArtist}</div>
-          {error && <div className="text-red-500 text-xs">{error}</div>}
+        <div className="flex-grow">
+          <div className="font-bold text-base">{item.name}</div>
+          <div className="text-sm">{artistNames}</div>
+          <div className="text-xs opacity-75">{item.album.name}</div>
         </div>
+        <div className="ml-auto">
+          <span className="px-2 py-1 bg-gray-200 rounded text-xs">
+            {is_playing ? 'Playing' : 'Paused'}
+          </span>
+        </div>
+      </div>
+      <div className="mt-2 text-center">
         <button 
-          className="win98-button ml-auto" 
-          onClick={handlePlayPause}
-          disabled={!song.preview_url}
+          onClick={fetchPlaybackState}
+          className="win98-button text-xs"
         >
-          {isPlaying ? 'Pause' : 'Play'}
+          Refresh
         </button>
       </div>
-      <audio ref={audioRef} />
     </div>
   );
 };
